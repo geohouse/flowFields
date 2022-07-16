@@ -52,10 +52,10 @@ class FlowVector {
   }
 }
 
-let hexWidth = 500,
-  hexHeight = 400,
-  hexCenter = [600, 600],
-  ySpacing = 100,
+let hexWidth = 250,
+  hexHeight = 200,
+  //hexCenter = [600, 600],
+  ySpacing = 50,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
   // means that the x spacing will be ~0.866 * y
   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
@@ -68,13 +68,38 @@ let hexWidth = 500,
   yArrayRaw = [],
   // These are the y values after the stagger has been applied. X values don't change,
   // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
-  yArrayOffset = [];
+  yArrayOffset = [],
+  width,
+  height,
+  center,
+  xStartPoint,
+  yStartPoint;
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
     context = canvas.getContext("2d"),
-    width = (canvas.width = window.innerWidth),
-    height = (canvas.height = window.innerHeight);
+    currColNum,
+    currRowNum;
+
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  center = [width / 2, height / 2];
+  // The x start point will err to the left
+  xStartPoint = center[0] - Math.ceil(numX * xSpacing);
+  // The y start point will err up
+  yStartPoint = center[1] - Math.ceil(numY * ySpacing);
+
+  for (let pointNum = 0; pointNum < numGridPoints; pointNum++) {
+    console.log(pointNum);
+    // 0 indexed
+    currRowNum = Math.floor(pointNum / numX);
+    // 0 indexed
+    currColNum = pointNum - currRowNum * numX;
+    // Populate the x, y arrays using the row/col nums for calc.
+    // Use ceil to make integer number of pixels
+    xArray.push(Math.ceil(xStartPoint + currColNum * xSpacing));
+    yArrayRaw.push(Math.ceil(yStartPoint + currRowNum * ySpacing));
+  }
 };
 
 // import { Vector, Particle } from "./physicsClasses.js";
