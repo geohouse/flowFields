@@ -52,8 +52,8 @@ class FlowVector {
   }
 }
 
-let hexWidth = 250,
-  hexHeight = 200,
+let hexWidth = 800,
+  hexHeight = 500,
   //hexCenter = [600, 600],
   ySpacing = 50,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
@@ -73,21 +73,27 @@ let hexWidth = 250,
   height,
   center,
   xStartPoint,
-  yStartPoint;
+  yStartPoint,
+  // Will be array of point objects, with one point object per point
+  flowVectorHolder = [];
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
     context = canvas.getContext("2d"),
     currColNum,
-    currRowNum;
+    currRowNum,
+    currXCoord,
+    currYCoord_raw,
+    currYCoord_offset,
+    currFlowVector_obj;
 
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
   center = [width / 2, height / 2];
   // The x start point will err to the left
-  xStartPoint = center[0] - Math.ceil(numX * xSpacing);
+  xStartPoint = center[0] - Math.ceil(numX * xSpacing) / 2;
   // The y start point will err up
-  yStartPoint = center[1] - Math.ceil(numY * ySpacing);
+  yStartPoint = center[1] - Math.ceil(numY * ySpacing) / 2;
 
   for (let pointNum = 0; pointNum < numGridPoints; pointNum++) {
     console.log(pointNum);
@@ -97,8 +103,27 @@ window.onload = function () {
     currColNum = pointNum - currRowNum * numX;
     // Populate the x, y arrays using the row/col nums for calc.
     // Use ceil to make integer number of pixels
-    xArray.push(Math.ceil(xStartPoint + currColNum * xSpacing));
-    yArrayRaw.push(Math.ceil(yStartPoint + currRowNum * ySpacing));
+    currXCoord = Math.ceil(xStartPoint + currColNum * xSpacing);
+    currYCoord_raw = Math.ceil(yStartPoint + currRowNum * ySpacing);
+
+    xArray.push(currXCoord);
+    yArrayRaw.push(currYCoord_raw);
+    // Offset the yArray values by ySpacing / 2 depending on the col number. Even col #
+    // offsets down (on the screen, so add the offset), even col # stay the same.
+    if (currColNum % 2 === 0) {
+      currYCoord_offset = currYCoord_raw + ySpacing / 2;
+    } else {
+      currYCoord_offset = currYCoord_raw;
+    }
+    yArrayOffset.push(currYCoord_offset);
+    // Use the x, y coords to set up a new FlowVector object for each coord.
+    currFlowVector_obj = new FlowVector(currXCoord, currYCoord_offset);
+    flowVectorHolder.push(currFlowVector_obj);
+
+    // Draw each point to the canvas as it is calculated
+    context.beginPath();
+    context.arc(currXCoord, currYCoord_offset, 10, 0, 2 * Math.PI, false);
+    context.fill();
   }
 };
 
