@@ -50,6 +50,27 @@ class FlowVector {
   set width(value) {
     this.#width = value;
   }
+
+  // Sets the angle while keeping the length the same
+  setAngle(angle) {
+    let length = this.getLength();
+    this.#x = Math.cos(angle) * length;
+    this.#y = Math.sin(angle) * length;
+  }
+
+  getAngle() {
+    return Math.atan2(this.#y, this.#x);
+  }
+  // Sets the length while keeping the angle the same
+  setLength(length) {
+    let angle = this.getAngle();
+    this.#x = Math.cos(angle) * length;
+    this.#y = Math.sin(angle) * length;
+  }
+
+  getLength() {
+    return Math.sqrt(this.#x * this.#x + this.#y * this.#y);
+  }
 }
 
 let hexWidth = 800,
@@ -76,6 +97,34 @@ let hexWidth = 800,
   yStartPoint,
   // Will be array of point objects, with one point object per point
   flowVectorHolder = [];
+
+function render() {
+  context.clearRect(0, 0, width, height);
+  //context.save();
+  //context.translate(arrowX, arrowY);
+  //context.rotate(angle);
+  // Canvas already offset by arrowX and arrowY, so don't need any other offset.
+  //x = Math.cos(animateAngle) * radius;
+  //y = Math.sin(animateAngle) * radius;
+  context.beginPath();
+
+  context.moveTo(x + 20, y + 0);
+  context.lineTo(x - 20, y + 0);
+  context.moveTo(x + 20, y + 0);
+  context.lineTo(x + 10, y - 10);
+  context.moveTo(x + 20, y + 0);
+  context.lineTo(x + 10, y + 10);
+  //context.arc(x, y, 10, 0, Math.PI * 2, false);
+  context.stroke();
+
+  context.fill();
+  // For testing animation speeds.
+  prevHolder = animateAngle;
+  //animateAngle += speed;
+  //console.log(animateAngle - prevHolder);
+  context.restore();
+  requestAnimationFrame(render);
+}
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
@@ -125,7 +174,66 @@ window.onload = function () {
     context.arc(currXCoord, currYCoord_offset, 10, 0, 2 * Math.PI, false);
     context.fill();
   }
+
+  // event.clientX and clientY are relative to upper left corner
+  let xCursorLoc = 0,
+    yCursorLoc = 0,
+    rescaleRotateX = 0,
+    rescaleRotateY = 0;
+  document.body.addEventListener("mousemove", function (event) {
+    xCursorLoc = event.clientX;
+    yCursorLoc = event.clientY;
+    console.log(xCursorLoc);
+    console.log(yCursorLoc);
+    // Now need to rotate by the previous angle (used to render the arrow, and used for the x, y coords)
+    // console.log(rescaleX);
+    // console.log({ x });
+    // console.log(rescaleY);
+    // console.log({ y });
+    // // Rotate axes CW
+    // rescaleRotateX =
+    //   -1 * rescaleX * Math.cos(angle) + rescaleY * Math.sin(angle);
+    // rescaleRotateY = rescaleX * Math.sin(angle) + rescaleY * Math.cos(angle);
+    // console.log({ rescaleRotateX });
+    // console.log({ rescaleRotateY });
+
+    // dx = rescaleRotateX - x;
+    // dy = rescaleRotateY - y;
+    // angleTest = 180 - Math.atan2(dy, dx) * (180 / Math.PI);
+    // console.log({ angleTest });
+    // //angle = Math.atan2(dy, dx);
+    // console.log({ dx });
+    // console.log({ dy });
+    // console.log(angle);
+  });
+
+  //render();
 };
+// document.body.addEventListener("mousemove", function (event) {
+//     rescaleX = event.clientX - width / 2;
+//     // -1 needed to flip the y axis
+//     rescaleY = -1 * (event.clientY - height / 2);
+//     // Now need to rotate by the previous angle (used to render the arrow, and used for the x, y coords)
+//     console.log(rescaleX);
+//     console.log({ x });
+//     console.log(rescaleY);
+//     console.log({ y });
+//     // Rotate axes CW
+//     rescaleRotateX =
+//       -1 * rescaleX * Math.cos(angle) + rescaleY * Math.sin(angle);
+//     rescaleRotateY = rescaleX * Math.sin(angle) + rescaleY * Math.cos(angle);
+//     console.log({ rescaleRotateX });
+//     console.log({ rescaleRotateY });
+
+//     dx = rescaleRotateX - x;
+//     dy = rescaleRotateY - y;
+//     angleTest = 180 - Math.atan2(dy, dx) * (180 / Math.PI);
+//     console.log({ angleTest });
+//     //angle = Math.atan2(dy, dx);
+//     console.log({ dx });
+//     console.log({ dy });
+//     console.log(angle);
+//   });
 
 // import { Vector, Particle } from "./physicsClasses.js";
 
