@@ -73,8 +73,69 @@ class FlowVector {
   }
 }
 
-let hexWidth = 700,
-  hexHeight = 600,
+// Javascript implementation of the Turbo color map polynomial approximation from
+// https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
+// more information about Turbo is here
+// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
+
+const getTurboRGB = function (inputDecimal) {
+  // inputDecimal is the variable that determines the color to return (i.e. where on a
+  // color ramp from [0,1] the variable value should fall)
+
+  let kRedVec4 = [0.13572138, 4.6153926, -42.66032258, 132.13108234],
+    kGreenVec4 = [0.09140261, 2.19418839, 4.84296658, -14.18503333],
+    kBlueVec4 = [0.1066733, 12.64194608, -60.58204836, 110.36276771],
+    kRedVec2 = [-152.94239396, 59.28637943],
+    kGreenVec2 = [4.27729857, 2.82956604],
+    kBlueVec2 = [-89.90310912, 27.34824973];
+  let colorMapSelection_sat = 0;
+  // Implementation of the glsl saturate() function to ensure the colorMapSelection value is
+  // within [0,1] (https://developer.download.nvidia.com/cg/saturate.html)
+  if (inputDecimal > 1) {
+    colorMapSelection_sat = 1;
+  } else if (inputDecimal < 0) {
+    colorMapSelection_sat = 0;
+  } else {
+    colorMapSelection_sat = inputDecimal;
+  }
+
+  let v4 = [
+    1.0,
+    colorMapSelection_sat,
+    colorMapSelection_sat * colorMapSelection_sat,
+    colorMapSelection_sat * colorMapSelection_sat * colorMapSelection_sat,
+  ];
+  //  Implementation of v4.zw * v4.z GLSL swizzle. Need to cast as array for dotProduct to work correctly below.
+  let v2 = [v4[2] * v4[3] * v4[2]];
+
+  // function to perform a dot product of 2 input arrays (modified from https://stackoverflow.com/questions/64816766/dot-product-of-two-arrays-in-javascript)
+  const dotProduct = function (array1, array2) {
+    // When give the map callback 2 parameters, the second is the index value (int) of the
+    // currently looped arrayElement
+    //console.log("array1");
+    //console.log(array1);
+    return array1
+      .map((arrayElement, arrayIndex) => {
+        return array1[arrayIndex] * array2[arrayIndex];
+      })
+      .reduce((totalValue, currentValue) => {
+        return (totalValue += currentValue);
+      }, 0);
+  };
+
+  //console.log({ v4 });
+  //console.log({ kRedVec4 });
+  let red = dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2);
+  let green = dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2);
+  let blue = dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2);
+
+  let turboRGB = [red, green, blue];
+
+  return turboRGB;
+};
+
+let hexWidth = 800,
+  hexHeight = 750,
   //hexCenter = [600, 600],
   ySpacing = 20,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
@@ -95,8 +156,8 @@ let hexWidth = 700,
   xArraySide2Offset = [],
   yArraySide1Offset = [],
   yArraySide2Offset = [],
-  width,
-  height,
+  windowWidth,
+  windowHeight,
   center,
   xStartPoint,
   yStartPoint,
@@ -113,9 +174,9 @@ window.onload = function () {
     currYCoord_offset,
     currFlowVector_obj;
 
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  center = [width / 2, height / 2];
+  windowWidth = canvas.width = window.innerWidth;
+  windowHeight = canvas.height = window.innerHeight;
+  center = [windowWidth / 2, windowHeight / 2];
   // The x start point will err to the left
   xStartPoint = center[0] - Math.ceil(numX * xSpacing) / 2;
   // The y start point will err up
@@ -146,10 +207,11 @@ window.onload = function () {
     currFlowVector_obj = new FlowVector(currXCoord, currYCoord_offset);
     flowVectorHolder.push(currFlowVector_obj);
 
+    // This is now handled in the render function.
     // Draw each point to the canvas as it is calculated
-    context.beginPath();
+    //context.beginPath();
     //context.arc(currXCoord, currYCoord_offset, 10, 0, 2 * Math.PI, false);
-    context.fill();
+    //context.fill();
   }
 
   // event.clientX and clientY are relative to upper left corner
@@ -166,6 +228,13 @@ window.onload = function () {
       currYIndex,
       currXCursorDist,
       currYCursorDist,
+      // The max distance possible on the screen (diagonal)
+      maxVectDist = Math.sqrt(
+        windowWidth * windowWidth + windowHeight * windowHeight
+      ),
+      currVectDist,
+      currRGB,
+      currDistRatio,
       currCursorAngle,
       currLeftDeflectX,
       currLeftDeflectY,
@@ -183,6 +252,19 @@ window.onload = function () {
       currXCursorDist = xCursorLoc - currXIndex;
       // Positive for cursor being below the point, negative for being above
       currYCursorDist = yCursorLoc - currYIndex;
+      // The current absolute distance between the cursor and the current vector in the hex grid
+      currVectDist = Math.sqrt(
+        currXCursorDist * currXCursorDist + currYCursorDist * currYCursorDist
+      );
+
+      // Get the ratio of the current distance between cursor and vector and the max possible distance. This is used to
+      // generate the rgb color vector using the Turbo color map
+      currDistRatio = currVectDist / maxVectDist;
+      currRGB = getTurboRGB(currDistRatio);
+
+      console.log({ currDistRatio });
+      console.log(currRGB);
+
       // Get the angle of the line between the point and the cursor in radians
       currCursorAngle = Math.atan2(currYCursorDist, currXCursorDist);
       // calculate the end points of a vector with length deflectLengthFactor that is centered on the point's coordinates
@@ -242,7 +324,7 @@ window.onload = function () {
 
   function render() {
     // comment out to have past vectors persist
-    context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, windowWidth, windowHeight);
     let currXvalue,
       currYvalue,
       currXvalue_side1,
@@ -265,8 +347,10 @@ window.onload = function () {
     for (let index = 0; index < xArray.length; index++) {
       context.beginPath();
 
-      currXvalue = xArray[index];
-      currYvalue = yArrayOffset[index];
+      //currXvalue = xArray[index];
+      //currYvalue = yArrayOffset[index];
+      currXvalue = flowVectorHolder[index].x;
+      currYvalue = flowVectorHolder[index].y;
       currXvalue_side1 = xArraySide1Offset[index];
       currXvalue_side2 = xArraySide2Offset[index];
       currYvalue_side1 = yArraySide1Offset[index];
@@ -274,7 +358,7 @@ window.onload = function () {
 
       context.moveTo(currXvalue_side1, currYvalue_side1);
       context.lineTo(currXvalue_side2, currYvalue_side2);
-      //context.arc(currXvalue, currYvalue, 5, 0, Math.PI * 2, false);
+      //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
       context.stroke();
       context.fill();
 
@@ -289,72 +373,6 @@ window.onload = function () {
   }
   render();
 };
-
-
-// Javascript implementation of the Turbo color map polynomial approximation from 
-// https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
-// more information about Turbo is here
-// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
-
-const getTurboRGB(inputDecimal){
-
-// inputDecimal is the variable that determines the color to return (i.e. where on a 
-// color ramp from [0,1] the variable value should fall)
-
-let kRedVec4 = [0.13572138, 4.61539260, -42.66032258, 132.13108234],
-    kGreenVec4 = [0.09140261, 2.19418839, 4.84296658, -14.18503333],
-    kBlueVec4 = [0.10667330, 12.64194608, -60.58204836, 110.36276771],
-    kRedVec2 = [-152.94239396, 59.28637943],
-    kGreenVec2 = [4.27729857, 2.82956604],
-    kBlueVec2 = [-89.90310912, 27.34824973];
-let colorMapSelection_sat = 0
-// Implementation of the glsl saturate() function to ensure the colorMapSelection value is 
-// within [0,1] (https://developer.download.nvidia.com/cg/saturate.html)
-if(inputDecimal > 1){
-    colorMapSelection_sat = 1
-} else if(inputDecimal < 0){
-    colorMapSelection_sat = 0
-} else{
-    colorMapSelection_sat = inputDecimal
-}
-
-let v4 = [1.0,colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat]
-//  Implementation of v4.zw * v4.z GLSL swizzle
-let v2 = v4[2] * v4[3] * v4[2]
-
-// function to perform a dot product of 2 input arrays (modified from https://stackoverflow.com/questions/64816766/dot-product-of-two-arrays-in-javascript)
-const dotProduct = function(array1, array2){
-    // When give the map callback 2 parameters, the second is the index value (int) of the 
-    // currently looped arrayElement
-    return array1.map((arrayElement, arrayIndex) => {
-        return array1[arrayIndex] * array2[arrayIndex]
-    }).reduce((totalValue, currentValue) =>{
-        return totalValue += currentValue
-    }, 0)
-}
-
-let red = dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2) 
-let green = dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2)
-let blue = dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2)
-
-let turboRGB = [red,green, blue]
-
-
-        x = saturate(x);
-        vec4 v4 = vec4( 1.0, x, x * x, x * x * x);
-        vec2 v2 = v4.zw * v4.z;
-        return vec3(
-          dot(v4, kRedVec4)   + dot(v2, kRedVec2),
-          dot(v4, kGreenVec4) + dot(v2, kGreenVec2),
-          dot(v4, kBlueVec4)  + dot(v2, kBlueVec2)
-        );
-      }
-
-
-
-
-
-
 
 // document.body.addEventListener("mousemove", function (event) {
 //     rescaleX = event.clientX - width / 2;
