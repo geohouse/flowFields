@@ -106,7 +106,7 @@ const getTurboRGB = function (inputDecimal) {
     colorMapSelection_sat * colorMapSelection_sat * colorMapSelection_sat,
   ];
   //  Implementation of v4.zw * v4.z GLSL swizzle. Need to cast as array for dotProduct to work correctly below.
-  let v2 = [v4[2] * v4[3] * v4[2]];
+  let v2 = [v4[2] * v4[2], v4[3] * v4[2]];
 
   // function to perform a dot product of 2 input arrays (modified from https://stackoverflow.com/questions/64816766/dot-product-of-two-arrays-in-javascript)
   const dotProduct = function (array1, array2) {
@@ -124,20 +124,21 @@ const getTurboRGB = function (inputDecimal) {
   };
 
   //console.log({ v4 });
-  //console.log({ kRedVec4 });
-  let red = dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2);
-  let green = dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2);
-  let blue = dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2);
+  console.log({ kRedVec4 });
+  // Color RGB values calculated below are in [0,1], so multiply by 255 here to get ready to use as CSS colors.
+  let red = 255 * (dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2));
+  let green = 255 * (dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2));
+  let blue = 255 * (dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2));
 
   let turboRGB = [red, green, blue];
-
+  console.log(turboRGB);
   return turboRGB;
 };
 
-let hexWidth = 800,
-  hexHeight = 750,
+let hexWidth = 200,
+  hexHeight = 150,
   //hexCenter = [600, 600],
-  ySpacing = 20,
+  ySpacing = 50,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
   // means that the x spacing will be ~0.866 * y
   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
@@ -349,11 +350,12 @@ window.onload = function () {
     //pre-calculated length)
     for (let index = 0; index < xArray.length; index++) {
       currColorArray = flowVectorHolder[index].color;
-      console.log("*******************");
-      console.log(currColorArray[0]);
-      console.log(currColorArray[1]);
-      console.log(currColorArray[2]);
-      //context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
+      //console.log("*******************");
+      // console.log(currColorArray[0]);
+      // console.log(currColorArray[1]);
+      // console.log(currColorArray[2]);
+      //context.strokeStyle = "rgb(255,0,0)";
+      context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
       //console.log(
       //  `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`
       //);
