@@ -124,21 +124,21 @@ const getTurboRGB = function (inputDecimal) {
   };
 
   //console.log({ v4 });
-  console.log({ kRedVec4 });
+  //console.log({ kRedVec4 });
   // Color RGB values calculated below are in [0,1], so multiply by 255 here to get ready to use as CSS colors.
   let red = 255 * (dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2));
   let green = 255 * (dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2));
   let blue = 255 * (dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2));
 
   let turboRGB = [red, green, blue];
-  console.log(turboRGB);
+  //console.log(turboRGB);
   return turboRGB;
 };
 
-let hexWidth = 200,
-  hexHeight = 150,
+let hexWidth = 900,
+  hexHeight = 800,
   //hexCenter = [600, 600],
-  ySpacing = 50,
+  ySpacing = 15,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
   // means that the x spacing will be ~0.866 * y
   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
@@ -235,6 +235,8 @@ window.onload = function () {
       ),
       currVectDist,
       currRGB,
+      linearDecay,
+      logDecay,
       currDistRatio,
       currCursorAngle,
       currLeftDeflectX,
@@ -260,7 +262,12 @@ window.onload = function () {
 
       // Get the ratio of the current distance between cursor and vector and the max possible distance. This is used to
       // generate the rgb color vector using the Turbo color map
-      currDistRatio = currVectDist / maxVectDist;
+      // Linear decay (doesn't get to reds quickly)
+      linearDecay = currVectDist / maxVectDist;
+      // Log decay (doesn't preserve a lot of blues)
+      logDecay = 1 - 1 / Math.log10(currVectDist);
+      // Modify the color decay with distance by changing the weights below.
+      currDistRatio = 0.4 * linearDecay + 0.6 * logDecay;
       currRGB = getTurboRGB(currDistRatio);
       // Set the RGB as the color for the current instance of the FlowVector (to be used for rendering below)
       flowVectorHolder[currIndex].color = currRGB;
