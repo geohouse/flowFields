@@ -15,7 +15,7 @@ class FlowVector {
   constructor(xInput, yInput) {
     this.#x = xInput;
     this.#y = yInput;
-    this.#color = "#FFFFFF";
+    this.#color = [0, 0, 0];
     this.#width = 1;
   }
 
@@ -261,9 +261,11 @@ window.onload = function () {
       // generate the rgb color vector using the Turbo color map
       currDistRatio = currVectDist / maxVectDist;
       currRGB = getTurboRGB(currDistRatio);
+      // Set the RGB as the color for the current instance of the FlowVector (to be used for rendering below)
+      flowVectorHolder[currIndex].color = currRGB;
 
-      console.log({ currDistRatio });
-      console.log(currRGB);
+      //console.log({ currDistRatio });
+      //console.log(currRGB);
 
       // Get the angle of the line between the point and the cursor in radians
       currCursorAngle = Math.atan2(currYCursorDist, currXCursorDist);
@@ -330,7 +332,8 @@ window.onload = function () {
       currXvalue_side1,
       currXvalue_side2,
       currYvalue_side1,
-      currYvalue_side2;
+      currYvalue_side2,
+      currColorArray;
 
     //context.clearRect(0, 0, width, height);
     //context.save();
@@ -345,6 +348,15 @@ window.onload = function () {
     // be used to plot the vector for the point that points to the cursor position (and with a correct,
     //pre-calculated length)
     for (let index = 0; index < xArray.length; index++) {
+      currColorArray = flowVectorHolder[index].color;
+      console.log("*******************");
+      console.log(currColorArray[0]);
+      console.log(currColorArray[1]);
+      console.log(currColorArray[2]);
+      //context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
+      //console.log(
+      //  `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`
+      //);
       context.beginPath();
 
       //currXvalue = xArray[index];
