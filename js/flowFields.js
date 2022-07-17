@@ -290,6 +290,71 @@ window.onload = function () {
   render();
 };
 
+
+// Javascript implementation of the Turbo color map polynomial approximation from 
+// https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
+// more information about Turbo is here
+// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
+
+// This is the variable that determines the color to return (i.e. where on a 
+// color ramp from [0,1] the variable value should fall)
+let colorMapSelection = 0.5
+let kRedVec4 = [0.13572138, 4.61539260, -42.66032258, 132.13108234],
+    kGreenVec4 = [0.09140261, 2.19418839, 4.84296658, -14.18503333],
+    kBlueVec4 = [0.10667330, 12.64194608, -60.58204836, 110.36276771],
+    kRedVec2 = [-152.94239396, 59.28637943],
+    kGreenVec2 = [4.27729857, 2.82956604],
+    kBlueVec2 = [-89.90310912, 27.34824973];
+let colorMapSelection_sat = 0
+// Implementation of the glsl saturate() function to ensure the colorMapSelection value is 
+// within [0,1] (https://developer.download.nvidia.com/cg/saturate.html)
+if(colorMapSelection > 1){
+    colorMapSelection_sat = 1
+} else if(colorMapSelection < 0){
+    colorMapSelection_sat = 0
+} else{
+    colorMapSelection_sat = colorMapSelection
+}
+
+let v4 = [1.0,colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat]
+//  Implementation of v4.zw * v4.z GLSL swizzle
+let v2 = v4[2] * v4[3] * v4[2]
+
+// function to perform a dot product of 2 input arrays (modified from https://stackoverflow.com/questions/64816766/dot-product-of-two-arrays-in-javascript)
+const dotProduct = function(array1, array2){
+    // When give the map callback 2 parameters, the second is the index value (int) of the 
+    // currently looped arrayElement
+    return array1.map((arrayElement, arrayIndex) => {
+        return array1[arrayIndex] * array2[arrayIndex]
+    }).reduce((totalValue, currentValue) =>{
+        return totalValue += currentValue
+    }, 0)
+}
+
+
+
+let red  = 
+let green
+let blue 
+
+
+
+        x = saturate(x);
+        vec4 v4 = vec4( 1.0, x, x * x, x * x * x);
+        vec2 v2 = v4.zw * v4.z;
+        return vec3(
+          dot(v4, kRedVec4)   + dot(v2, kRedVec2),
+          dot(v4, kGreenVec4) + dot(v2, kGreenVec2),
+          dot(v4, kBlueVec4)  + dot(v2, kBlueVec2)
+        );
+      }
+
+
+
+
+
+
+
 // document.body.addEventListener("mousemove", function (event) {
 //     rescaleX = event.clientX - width / 2;
 //     // -1 needed to flip the y axis
