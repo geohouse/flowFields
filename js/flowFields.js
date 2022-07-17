@@ -50,7 +50,7 @@ class FlowVector {
   set width(value) {
     this.#width = value;
   }
-
+  // These instance methods aren't currently being used.
   // Sets the angle while keeping the length the same
   setAngle(angle) {
     let length = this.getLength();
@@ -73,10 +73,10 @@ class FlowVector {
   }
 }
 
-let hexWidth = 250,
-  hexHeight = 200,
+let hexWidth = 700,
+  hexHeight = 600,
   //hexCenter = [600, 600],
-  ySpacing = 50,
+  ySpacing = 20,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
   // means that the x spacing will be ~0.866 * y
   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
@@ -172,8 +172,9 @@ window.onload = function () {
       currRightDeflectX,
       currRightDeflectY,
       // Eventually this will be derived from a formula to allow altering the length based on distance from the cursor.
-      //Currently this is the total length of the vector (half is allocated to each side around the center point)
-      deflectLengthFactor = 20;
+      //Currently this is the total length of the vector (half is allocated to each side around the center point).
+      // If this is the same as the ySpacing, will exactly form closed lines vertically and along diagonals
+      deflectLengthFactor = 10;
 
     for (let currIndex = 0; currIndex < xArray.length; currIndex++) {
       currXIndex = xArray[currIndex];
@@ -240,6 +241,8 @@ window.onload = function () {
   });
 
   function render() {
+    // comment out to have past vectors persist
+    context.clearRect(0, 0, width, height);
     let currXvalue,
       currYvalue,
       currXvalue_side1,
