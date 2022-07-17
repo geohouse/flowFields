@@ -90,6 +90,11 @@ let hexWidth = 250,
   // These are the y values after the stagger has been applied. X values don't change,
   // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
   yArrayOffset = [],
+  // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
+  xArraySide1Offset = [],
+  xArraySide2Offset = [],
+  yArraySide1Offset = [],
+  yArraySide2Offset = [],
   width,
   height,
   center,
@@ -97,34 +102,6 @@ let hexWidth = 250,
   yStartPoint,
   // Will be array of point objects, with one point object per point
   flowVectorHolder = [];
-
-function render() {
-  context.clearRect(0, 0, width, height);
-  //context.save();
-  //context.translate(arrowX, arrowY);
-  //context.rotate(angle);
-  // Canvas already offset by arrowX and arrowY, so don't need any other offset.
-  //x = Math.cos(animateAngle) * radius;
-  //y = Math.sin(animateAngle) * radius;
-  context.beginPath();
-
-  context.moveTo(x + 20, y + 0);
-  context.lineTo(x - 20, y + 0);
-  context.moveTo(x + 20, y + 0);
-  context.lineTo(x + 10, y - 10);
-  context.moveTo(x + 20, y + 0);
-  context.lineTo(x + 10, y + 10);
-  //context.arc(x, y, 10, 0, Math.PI * 2, false);
-  context.stroke();
-
-  context.fill();
-  // For testing animation speeds.
-  prevHolder = animateAngle;
-  //animateAngle += speed;
-  //console.log(animateAngle - prevHolder);
-  context.restore();
-  requestAnimationFrame(render);
-}
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
@@ -171,7 +148,7 @@ window.onload = function () {
 
     // Draw each point to the canvas as it is calculated
     context.beginPath();
-    context.arc(currXCoord, currYCoord_offset, 10, 0, 2 * Math.PI, false);
+    //context.arc(currXCoord, currYCoord_offset, 10, 0, 2 * Math.PI, false);
     context.fill();
   }
 
@@ -183,8 +160,8 @@ window.onload = function () {
   document.body.addEventListener("mousemove", function (event) {
     xCursorLoc = event.clientX;
     yCursorLoc = event.clientY;
-    console.log(xCursorLoc);
-    console.log(yCursorLoc);
+    // console.log(xCursorLoc);
+    // console.log(yCursorLoc);
     let currXIndex,
       currYIndex,
       currXCursorDist,
@@ -195,6 +172,7 @@ window.onload = function () {
       currRightDeflectX,
       currRightDeflectY,
       // Eventually this will be derived from a formula to allow altering the length based on distance from the cursor.
+      //Currently this is the total length of the vector (half is allocated to each side around the center point)
       deflectLengthFactor = 20;
 
     for (let currIndex = 0; currIndex < xArray.length; currIndex++) {
@@ -209,13 +187,34 @@ window.onload = function () {
       // calculate the end points of a vector with length deflectLengthFactor that is centered on the point's coordinates
       // and is pointing toward the cursor.
       currLeftDeflectX =
-        currXIndex - deflectLengthFactor * Math.cos(currCursorAngle);
+        currXIndex - (deflectLengthFactor / 2) * Math.cos(currCursorAngle);
       currRightDeflectX =
-        currXIndex + deflectLengthFactor * Math.cos(currCursorAngle);
+        currXIndex + (deflectLengthFactor / 2) * Math.cos(currCursorAngle);
       currLeftDeflectY =
-        currYIndex - deflectLengthFactor * Math.sin(currCursorAngle);
+        currYIndex - (deflectLengthFactor / 2) * Math.sin(currCursorAngle);
       currRightDeflectY =
-        currYIndex + deflectLengthFactor * Math.sin(currCursorAngle);
+        currYIndex + (deflectLengthFactor / 2) * Math.sin(currCursorAngle);
+
+      //   console.log("After recent mouse move");
+      //   console.log({ xCursorLoc });
+      //   console.log({ yCursorLoc });
+      //   console.log({ currXIndex });
+      //   console.log({ currYIndex });
+      //   console.log({ currXCursorDist });
+      //   console.log({ currYCursorDist });
+      //   console.log({ currCursorAngle });
+      //   console.log({ currLeftDeflectX });
+      //   console.log({ currRightDeflectX });
+      //   console.log({ currLeftDeflectY });
+      //   console.log({ currRightDeflectY });
+
+      // Add the calculated x,y points for the vector with an angle pointing to the mouse cursor and a length
+      // matching the specifications to the holder arrays (these will get overwritten by index for each vector every
+      // time the cursor moves)
+      xArraySide1Offset[currIndex] = currLeftDeflectX;
+      xArraySide2Offset[currIndex] = currRightDeflectX;
+      yArraySide1Offset[currIndex] = currLeftDeflectY;
+      yArraySide2Offset[currIndex] = currRightDeflectY;
     }
 
     // Now need to rotate by the previous angle (used to render the arrow, and used for the x, y coords)
@@ -240,8 +239,54 @@ window.onload = function () {
     // console.log(angle);
   });
 
-  //render();
+  function render() {
+    let currXvalue,
+      currYvalue,
+      currXvalue_side1,
+      currXvalue_side2,
+      currYvalue_side1,
+      currYvalue_side2;
+
+    //context.clearRect(0, 0, width, height);
+    //context.save();
+    //context.translate(arrowX, arrowY);
+    //context.rotate(angle);
+    // Canvas already offset by arrowX and arrowY, so don't need any other offset.
+    //x = Math.cos(animateAngle) * radius;
+    //y = Math.sin(animateAngle) * radius;
+
+    // Loop through all of the arrays for plotting. The x and y array will be used
+    // to plot the center point for each vector, and the x and y arrays for sides 1 and 2 will
+    // be used to plot the vector for the point that points to the cursor position (and with a correct,
+    //pre-calculated length)
+    for (let index = 0; index < xArray.length; index++) {
+      context.beginPath();
+
+      currXvalue = xArray[index];
+      currYvalue = yArrayOffset[index];
+      currXvalue_side1 = xArraySide1Offset[index];
+      currXvalue_side2 = xArraySide2Offset[index];
+      currYvalue_side1 = yArraySide1Offset[index];
+      currYvalue_side2 = yArraySide2Offset[index];
+
+      context.moveTo(currXvalue_side1, currYvalue_side1);
+      context.lineTo(currXvalue_side2, currYvalue_side2);
+      //context.arc(currXvalue, currYvalue, 5, 0, Math.PI * 2, false);
+      context.stroke();
+      context.fill();
+
+      //context.fillRect(0, 0, width, height);
+    }
+    // For testing animation speeds.
+    //prevHolder = animateAngle;
+    //animateAngle += speed;
+    //console.log(animateAngle - prevHolder);
+    //context.restore();
+    requestAnimationFrame(render);
+  }
+  render();
 };
+
 // document.body.addEventListener("mousemove", function (event) {
 //     rescaleX = event.clientX - width / 2;
 //     // -1 needed to flip the y axis
