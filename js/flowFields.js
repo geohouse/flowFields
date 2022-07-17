@@ -73,8 +73,8 @@ class FlowVector {
   }
 }
 
-let hexWidth = 800,
-  hexHeight = 500,
+let hexWidth = 250,
+  hexHeight = 200,
   //hexCenter = [600, 600],
   ySpacing = 50,
   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
@@ -185,6 +185,39 @@ window.onload = function () {
     yCursorLoc = event.clientY;
     console.log(xCursorLoc);
     console.log(yCursorLoc);
+    let currXIndex,
+      currYIndex,
+      currXCursorDist,
+      currYCursorDist,
+      currCursorAngle,
+      currLeftDeflectX,
+      currLeftDeflectY,
+      currRightDeflectX,
+      currRightDeflectY,
+      // Eventually this will be derived from a formula to allow altering the length based on distance from the cursor.
+      deflectLengthFactor = 20;
+
+    for (let currIndex = 0; currIndex < xArray.length; currIndex++) {
+      currXIndex = xArray[currIndex];
+      currYIndex = yArrayOffset[currIndex];
+      // Positive for cursor being to right of the point, negative for being to left
+      currXCursorDist = xCursorLoc - currXIndex;
+      // Positive for cursor being below the point, negative for being above
+      currYCursorDist = yCursorLoc - currYIndex;
+      // Get the angle of the line between the point and the cursor in radians
+      currCursorAngle = Math.atan2(currYCursorDist, currXCursorDist);
+      // calculate the end points of a vector with length deflectLengthFactor that is centered on the point's coordinates
+      // and is pointing toward the cursor.
+      currLeftDeflectX =
+        currXIndex - deflectLengthFactor * Math.cos(currCursorAngle);
+      currRightDeflectX =
+        currXIndex + deflectLengthFactor * Math.cos(currCursorAngle);
+      currLeftDeflectY =
+        currYIndex - deflectLengthFactor * Math.sin(currCursorAngle);
+      currRightDeflectY =
+        currYIndex + deflectLengthFactor * Math.sin(currCursorAngle);
+    }
+
     // Now need to rotate by the previous angle (used to render the arrow, and used for the x, y coords)
     // console.log(rescaleX);
     // console.log({ x });
