@@ -296,9 +296,11 @@ window.onload = function () {
 // more information about Turbo is here
 // https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
 
-// This is the variable that determines the color to return (i.e. where on a 
+const getTurboRGB(inputDecimal){
+
+// inputDecimal is the variable that determines the color to return (i.e. where on a 
 // color ramp from [0,1] the variable value should fall)
-let colorMapSelection = 0.5
+
 let kRedVec4 = [0.13572138, 4.61539260, -42.66032258, 132.13108234],
     kGreenVec4 = [0.09140261, 2.19418839, 4.84296658, -14.18503333],
     kBlueVec4 = [0.10667330, 12.64194608, -60.58204836, 110.36276771],
@@ -308,12 +310,12 @@ let kRedVec4 = [0.13572138, 4.61539260, -42.66032258, 132.13108234],
 let colorMapSelection_sat = 0
 // Implementation of the glsl saturate() function to ensure the colorMapSelection value is 
 // within [0,1] (https://developer.download.nvidia.com/cg/saturate.html)
-if(colorMapSelection > 1){
+if(inputDecimal > 1){
     colorMapSelection_sat = 1
-} else if(colorMapSelection < 0){
+} else if(inputDecimal < 0){
     colorMapSelection_sat = 0
 } else{
-    colorMapSelection_sat = colorMapSelection
+    colorMapSelection_sat = inputDecimal
 }
 
 let v4 = [1.0,colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat * colorMapSelection_sat, colorMapSelection_sat]
@@ -331,12 +333,11 @@ const dotProduct = function(array1, array2){
     }, 0)
 }
 
+let red = dotProduct(v4, kRedVec4) + dotProduct(v2, kRedVec2) 
+let green = dotProduct(v4, kGreenVec4) + dotProduct(v2, kGreenVec2)
+let blue = dotProduct(v4, kBlueVec4) + dotProduct(v2, kBlueVec2)
 
-
-let red  = 
-let green
-let blue 
-
+let turboRGB = [red,green, blue]
 
 
         x = saturate(x);
