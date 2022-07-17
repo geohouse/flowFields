@@ -184,7 +184,7 @@ window.onload = function () {
   yStartPoint = center[1] - Math.ceil(numY * ySpacing) / 2;
 
   for (let pointNum = 0; pointNum < numGridPoints; pointNum++) {
-    console.log(pointNum);
+    //console.log(pointNum);
     // 0 indexed
     currRowNum = Math.floor(pointNum / numX);
     // 0 indexed
@@ -246,7 +246,7 @@ window.onload = function () {
       // Eventually this will be derived from a formula to allow altering the length based on distance from the cursor.
       //Currently this is the total length of the vector (half is allocated to each side around the center point).
       // If this is the same as the ySpacing, will exactly form closed lines vertically and along diagonals
-      deflectLengthFactor = 10;
+      deflectLengthFactor = 15;
 
     for (let currIndex = 0; currIndex < xArray.length; currIndex++) {
       currXIndex = xArray[currIndex];
@@ -362,6 +362,7 @@ window.onload = function () {
       // console.log(currColorArray[1]);
       // console.log(currColorArray[2]);
       //context.strokeStyle = "rgb(255,0,0)";
+      context.lineWidth = 6;
       context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
       //console.log(
       //  `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`
