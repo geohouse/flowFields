@@ -163,9 +163,9 @@ let hexWidth = 900,
   xStartPoint,
   yStartPoint,
   // Will be array of point objects, with one point object per point
-  flowVectorHolder = [],
-  // Sets whether to use a glow or not
-  glow = false;
+  flowVectorHolder = [];
+// Sets whether to use a glow or not
+//glow = false;
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
@@ -175,7 +175,18 @@ window.onload = function () {
     currXCoord,
     currYCoord_raw,
     currYCoord_offset,
-    currFlowVector_obj;
+    currFlowVector_obj,
+    glow,
+    lineWidth;
+
+  document.querySelector("#glow").addEventListener("change", (event) => {
+    console.log(event.currentTarget.checked);
+    glow = event.currentTarget.checked;
+    console.log({ glow });
+    render(lineWidth, glow);
+  });
+
+  lineWidth = 6;
 
   windowWidth = canvas.width = window.innerWidth;
   windowHeight = canvas.height = window.innerHeight;
@@ -334,7 +345,7 @@ window.onload = function () {
     // console.log(angle);
   });
 
-  function render() {
+  function render(lineWidth, glow) {
     // comment out to have past vectors persist
     context.clearRect(0, 0, windowWidth, windowHeight);
     let currXvalue,
@@ -364,7 +375,7 @@ window.onload = function () {
       // console.log(currColorArray[1]);
       // console.log(currColorArray[2]);
       //context.strokeStyle = "rgb(255,0,0)";
-      context.lineWidth = 6;
+      context.lineWidth = lineWidth;
       context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
       //console.log(
       //  `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`
@@ -443,9 +454,11 @@ window.onload = function () {
     //animateAngle += speed;
     //console.log(animateAngle - prevHolder);
     //context.restore();
-    requestAnimationFrame(render);
+    requestAnimationFrame(() => {
+      render(lineWidth, glow);
+    });
   }
-  render();
+  render(lineWidth, glow);
 };
 
 // document.body.addEventListener("mousemove", function (event) {
