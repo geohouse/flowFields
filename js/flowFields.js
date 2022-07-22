@@ -163,7 +163,9 @@ let hexWidth = 900,
   xStartPoint,
   yStartPoint,
   // Will be array of point objects, with one point object per point
-  flowVectorHolder = [];
+  flowVectorHolder = [],
+  // Sets whether to use a glow or not
+  glow = true;
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
@@ -383,6 +385,56 @@ window.onload = function () {
       //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
       context.stroke();
       context.fill();
+
+      if (glow) {
+        context.lineWidth = 3;
+        context.strokeStyle = `rgb(255,255,255,0.8)`;
+
+        // Can't figure out how to have the glow not extend the whole length of each flow vector.
+        // All trials have created dual glow vector areas (change to rgb(0,0,0) to see/debug.)
+        // Have the glow cover 80% of the line length (so 90% of each side)
+        // side 1 is left, side 2 is right.
+        // let glowSide1 = new FlowVector(currXvalue_side1, currYvalue_side1);
+        // let glowSide2 = new FlowVector(currXvalue_side2, currYvalue_side2);
+        // glowSide1.setLength(0.5 * glowSide1.getLength());
+        // glowSide2.setLength(0.5 * glowSide2.getLength());
+
+        currXvalue_side1_glow1 = xArraySide1Offset[index];
+        currXvalue_side2_glow1 = xArraySide2Offset[index];
+        currYvalue_side1_glow1 = yArraySide1Offset[index];
+        currYvalue_side2_glow1 = yArraySide2Offset[index];
+
+        context.moveTo(currXvalue_side1_glow1, currYvalue_side1_glow1);
+        context.lineTo(currXvalue_side2_glow1, currYvalue_side2_glow1);
+        //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
+        //console.log(xArraySide1Offset[index]);
+        context.stroke();
+        context.fill();
+
+        context.lineWidth = 1.5;
+        context.strokeStyle = `rgb(255,255,255,1)`;
+
+        // Can't figure out how to have the glow not extend the whole length of each flow vector.
+        // All trials have created dual glow vector areas (change to rgb(0,0,0) to see/debug.)
+        // Have the glow cover 80% of the line length (so 90% of each side)
+        // side 1 is left, side 2 is right.
+        // let glowSide1 = new FlowVector(currXvalue_side1, currYvalue_side1);
+        // let glowSide2 = new FlowVector(currXvalue_side2, currYvalue_side2);
+        // glowSide1.setLength(0.5 * glowSide1.getLength());
+        // glowSide2.setLength(0.5 * glowSide2.getLength());
+
+        currXvalue_side1_glow2 = xArraySide1Offset[index];
+        currXvalue_side2_glow2 = xArraySide2Offset[index];
+        currYvalue_side1_glow2 = yArraySide1Offset[index];
+        currYvalue_side2_glow2 = yArraySide2Offset[index];
+
+        context.moveTo(currXvalue_side1_glow2, currYvalue_side1_glow2);
+        context.lineTo(currXvalue_side2_glow2, currYvalue_side2_glow2);
+        //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
+        //console.log(xArraySide1Offset[index]);
+        context.stroke();
+        context.fill();
+      }
 
       //context.fillRect(0, 0, width, height);
     }
