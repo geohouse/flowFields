@@ -165,7 +165,7 @@ let hexWidth = 900,
   // Will be array of point objects, with one point object per point
   flowVectorHolder = [],
   // Sets whether to use a glow or not
-  glow = true;
+  glow = false;
 
 window.onload = function () {
   let canvas = document.getElementById("canvas"),
