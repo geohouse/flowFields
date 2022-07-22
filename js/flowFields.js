@@ -179,6 +179,8 @@ window.onload = function () {
     glow,
     lineWidth;
 
+  // Listen for changes to the glow checkbox and lineWidth slider and re-render the flow field
+  // with those changes.
   document.querySelector("#glow").addEventListener("change", (event) => {
     console.log(event.currentTarget.checked);
     glow = event.currentTarget.checked;
@@ -186,6 +188,14 @@ window.onload = function () {
     render(lineWidth, glow);
   });
 
+  document
+    .querySelector("#width-select")
+    .addEventListener("change", (event) => {
+      console.log(event.currentTarget.value);
+      // The value (the selected width) from the range slider is a string so convert to an int
+      lineWidth = Number.parseInt(event.currentTarget.value);
+      render(lineWidth, glow);
+    });
   lineWidth = 6;
 
   windowWidth = canvas.width = window.innerWidth;
@@ -454,6 +464,10 @@ window.onload = function () {
     //animateAngle += speed;
     //console.log(animateAngle - prevHolder);
     //context.restore();
+
+    // Because requestAnimationFrame requires a callback function with no input arguments, but the glow and lineWidth arguments are
+    // needed for the render() function in order to dynamically change them, need to wrap render(<arguments>) in an anonymous function
+    // that doesn't have any arguments.
     requestAnimationFrame(() => {
       render(lineWidth, glow);
     });
