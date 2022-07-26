@@ -2,6 +2,31 @@ html,
 body {
   margin: 0px;
 }
+.layout-holder {
+  display: flex;
+  flex-flow: row;
+}
+
 canvas {
   display: block;
+  border: 1px #444444;
+  flex: 3 100px;
+  min-width: 0;
+}
+body {
+  display: flex;
+  /* default, but just making explicit*/
+  flex-direction: column;
+}
+
+.selection-container {
+  background-color: #bbbbbbaa;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-start;
+}
+
+.glow-selector,
+.width-selector {
+  flex: 1 20;
 }

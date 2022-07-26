@@ -8,12 +8,18 @@
   </head>
 
   <body>
-    <canvas id="canvas"></canvas>
-    <div>
-      <label for="width-select">Select a line width</label>
-      <input type="range" id="width-select" name="width" min="2" max="30" />
-      <label for="glow">Turn on a glow?</label>
-      <input type="checkbox" id="glow" name="glow" />
+    <div class="layout-holder">
+      <canvas id="canvas" width="1000" height="800"></canvas>
+      <div class="selection-container">
+        <div class="width-selector">
+          <label for="width-select">Select a line width</label>
+          <input type="range" id="width-select" name="width" min="2" max="30" />
+        </div>
+        <div class="glow-selector">
+          <label for="glow">Turn on a glow?</label>
+          <input type="checkbox" id="glow" name="glow" />
+        </div>
+      </div>
     </div>
   </body>
 </html>

@@ -135,35 +135,35 @@ const getTurboRGB = function (inputDecimal) {
   return turboRGB;
 };
 
-let hexWidth = 900,
-  hexHeight = 800,
-  //hexCenter = [600, 600],
-  ySpacing = 15,
-  // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
-  // means that the x spacing will be ~0.866 * y
-  xSpacing = Math.cos(Math.PI / 6) * ySpacing,
-  // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
-  numX = Math.floor(hexWidth / xSpacing),
-  numY = Math.floor(hexHeight / ySpacing),
-  numGridPoints = numX * numY,
-  xArray = [],
-  // These are the raw y values (a rectangular grid with horizontal rows)
-  yArrayRaw = [],
-  // These are the y values after the stagger has been applied. X values don't change,
-  // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
-  yArrayOffset = [],
-  // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
-  xArraySide1Offset = [],
-  xArraySide2Offset = [],
-  yArraySide1Offset = [],
-  yArraySide2Offset = [],
-  windowWidth,
-  windowHeight,
-  center,
-  xStartPoint,
-  yStartPoint,
-  // Will be array of point objects, with one point object per point
-  flowVectorHolder = [];
+// let hexWidth = canvas.width,
+//   hexHeight = canvas.height,
+//   //hexCenter = [600, 600],
+//   ySpacing = 15,
+//   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
+//   // means that the x spacing will be ~0.866 * y
+//   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
+//   // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
+//   numX = Math.floor(hexWidth / xSpacing),
+//   numY = Math.floor(hexHeight / ySpacing),
+//   numGridPoints = numX * numY,
+//   xArray = [],
+//   // These are the raw y values (a rectangular grid with horizontal rows)
+//   yArrayRaw = [],
+//   // These are the y values after the stagger has been applied. X values don't change,
+//   // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
+//   yArrayOffset = [],
+//   // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
+//   xArraySide1Offset = [],
+//   xArraySide2Offset = [],
+//   yArraySide1Offset = [],
+//   yArraySide2Offset = [],
+//   windowWidth,
+//   windowHeight,
+//   center,
+//   xStartPoint,
+//   yStartPoint,
+//   // Will be array of point objects, with one point object per point
+//   flowVectorHolder = [];
 // Sets whether to use a glow or not
 //glow = false;
 
@@ -178,6 +178,39 @@ window.onload = function () {
     currFlowVector_obj,
     glow,
     lineWidth;
+
+  let hexWidth = canvas.width,
+    hexHeight = canvas.height,
+    //hexCenter = [600, 600],
+    ySpacing = 15,
+    // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
+    // means that the x spacing will be ~0.866 * y
+    xSpacing = Math.cos(Math.PI / 6) * ySpacing,
+    // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
+    numX = Math.floor(hexWidth / xSpacing),
+    numY = Math.floor(hexHeight / ySpacing),
+    numGridPoints = numX * numY,
+    xArray = [],
+    // These are the raw y values (a rectangular grid with horizontal rows)
+    yArrayRaw = [],
+    // These are the y values after the stagger has been applied. X values don't change,
+    // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
+    yArrayOffset = [],
+    // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
+    xArraySide1Offset = [],
+    xArraySide2Offset = [],
+    yArraySide1Offset = [],
+    yArraySide2Offset = [],
+    windowWidth,
+    windowHeight,
+    center,
+    xStartPoint,
+    yStartPoint,
+    // Will be array of point objects, with one point object per point
+    flowVectorHolder = [];
+
+  console.log({ hexHeight });
+  console.log({ hexWidth });
 
   // Listen for changes to the glow checkbox and lineWidth slider and re-render the flow field
   // with those changes.
