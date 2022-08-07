@@ -2,31 +2,40 @@ html,
 body {
   margin: 0px;
 }
-.layout-holder {
-  display: flex;
-  flex-flow: row;
+.canvas-holder {
+  position: fixed;
+  top: 0;
+  right: 0;
 }
 
 canvas {
   display: block;
-  border: 1px #444444;
-  flex: 3 100px;
+  /*border: 1px solid #444444;*/
   min-width: 0;
 }
 body {
-  display: flex;
-  /* default, but just making explicit*/
-  flex-direction: column;
+  /* display: flex; */
+}
+
+.start-text {
+  position: fixed;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  top: 50vh;
+  left: 50vw;
 }
 
 .selection-container {
   background-color: #bbbbbbaa;
-  display: flex;
-  flex-flow: column;
-  justify-content: flex-start;
+  position: fixed;
+  height: 15vh;
+  width: 15vw;
+  top: 0px;
+  left: 80vw;
+  padding: 0px 0px 30px 0px;
 }
 
 .glow-selector,
 .width-selector {
-  flex: 1 20;
+  margin: 10px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }

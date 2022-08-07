@@ -276,6 +276,14 @@ window.onload = function () {
     yCursorLoc = 0,
     rescaleRotateX = 0,
     rescaleRotateY = 0;
+
+  document.body.addEventListener("mouseenter", function () {
+    // Clear out the holder start text if needed.
+    if (document.querySelector(".start-text")) {
+      document.querySelector(".start-text").remove();
+    }
+  });
+
   document.body.addEventListener("mousemove", function (event) {
     xCursorLoc = event.clientX;
     yCursorLoc = event.clientY;
