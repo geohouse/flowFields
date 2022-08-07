@@ -168,7 +168,7 @@ const getTurboRGB = function (inputDecimal) {
 //glow = false;
 
 window.onload = function () {
-  let canvas = document.getElementById("canvas"),
+  let canvas = document.querySelector("#canvas"),
     context = canvas.getContext("2d"),
     currColNum,
     currRowNum,

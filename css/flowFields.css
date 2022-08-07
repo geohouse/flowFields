@@ -13,9 +13,6 @@ canvas {
   /*border: 1px solid #444444;*/
   min-width: 0;
 }
-body {
-  /* display: flex; */
-}
 
 .start-text {
   position: fixed;
@@ -25,11 +22,11 @@ body {
 }
 
 .selection-container {
-  background-color: #bbbbbbaa;
+  background-color: #ddddddaa;
   position: fixed;
-  height: 15vh;
-  width: 15vw;
-  top: 0px;
+  height: 5em;
+  width: 12em;
+  top: 5vh;
   left: 80vw;
   padding: 0px 0px 30px 0px;
 }
