@@ -2,6 +2,37 @@ html,
 body {
   margin: 0px;
 }
+.canvas-holder {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
 canvas {
   display: block;
+  /*border: 1px solid #444444;*/
+  min-width: 0;
+}
+
+.start-text {
+  position: fixed;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  top: 50vh;
+  left: 50vw;
+}
+
+.selection-container {
+  background-color: #ddddddaa;
+  position: fixed;
+  height: 5em;
+  width: 12em;
+  top: 5vh;
+  left: 80vw;
+  padding: 0px 0px 30px 0px;
+}
+
+.glow-selector,
+.width-selector {
+  margin: 10px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }

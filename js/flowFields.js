@@ -135,47 +135,101 @@ const getTurboRGB = function (inputDecimal) {
   return turboRGB;
 };
 
-let hexWidth = 900,
-  hexHeight = 800,
-  //hexCenter = [600, 600],
-  ySpacing = 15,
-  // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
-  // means that the x spacing will be ~0.866 * y
-  xSpacing = Math.cos(Math.PI / 6) * ySpacing,
-  // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
-  numX = Math.floor(hexWidth / xSpacing),
-  numY = Math.floor(hexHeight / ySpacing),
-  numGridPoints = numX * numY,
-  xArray = [],
-  // These are the raw y values (a rectangular grid with horizontal rows)
-  yArrayRaw = [],
-  // These are the y values after the stagger has been applied. X values don't change,
-  // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
-  yArrayOffset = [],
-  // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
-  xArraySide1Offset = [],
-  xArraySide2Offset = [],
-  yArraySide1Offset = [],
-  yArraySide2Offset = [],
-  windowWidth,
-  windowHeight,
-  center,
-  xStartPoint,
-  yStartPoint,
-  // Will be array of point objects, with one point object per point
-  flowVectorHolder = [],
-  // Sets whether to use a glow or not
-  glow = true;
+// let hexWidth = canvas.width,
+//   hexHeight = canvas.height,
+//   //hexCenter = [600, 600],
+//   ySpacing = 15,
+//   // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
+//   // means that the x spacing will be ~0.866 * y
+//   xSpacing = Math.cos(Math.PI / 6) * ySpacing,
+//   // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
+//   numX = Math.floor(hexWidth / xSpacing),
+//   numY = Math.floor(hexHeight / ySpacing),
+//   numGridPoints = numX * numY,
+//   xArray = [],
+//   // These are the raw y values (a rectangular grid with horizontal rows)
+//   yArrayRaw = [],
+//   // These are the y values after the stagger has been applied. X values don't change,
+//   // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
+//   yArrayOffset = [],
+//   // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
+//   xArraySide1Offset = [],
+//   xArraySide2Offset = [],
+//   yArraySide1Offset = [],
+//   yArraySide2Offset = [],
+//   windowWidth,
+//   windowHeight,
+//   center,
+//   xStartPoint,
+//   yStartPoint,
+//   // Will be array of point objects, with one point object per point
+//   flowVectorHolder = [];
+// Sets whether to use a glow or not
+//glow = false;
 
 window.onload = function () {
-  let canvas = document.getElementById("canvas"),
+  let canvas = document.querySelector("#canvas"),
     context = canvas.getContext("2d"),
     currColNum,
     currRowNum,
     currXCoord,
     currYCoord_raw,
     currYCoord_offset,
-    currFlowVector_obj;
+    currFlowVector_obj,
+    glow,
+    lineWidth;
+
+  let hexWidth = canvas.width,
+    hexHeight = canvas.height,
+    //hexCenter = [600, 600],
+    ySpacing = 15,
+    // Need to set the x spacing based on the hexagon line angle and the ySpacing so that the hexagons will be regular. This
+    // means that the x spacing will be ~0.866 * y
+    xSpacing = Math.cos(Math.PI / 6) * ySpacing,
+    // Round down for the num x (num cols), and num y (num rows) to keep within the selected bounding box
+    numX = Math.floor(hexWidth / xSpacing),
+    numY = Math.floor(hexHeight / ySpacing),
+    numGridPoints = numX * numY,
+    xArray = [],
+    // These are the raw y values (a rectangular grid with horizontal rows)
+    yArrayRaw = [],
+    // These are the y values after the stagger has been applied. X values don't change,
+    // so points are still in columns, but alternate rows are each staggered up/down by ySpacing / 2
+    yArrayOffset = [],
+    // These 4 arrays will be used to keep track of the x,y coords for both ends of each point's vector every time the mouse moves.
+    xArraySide1Offset = [],
+    xArraySide2Offset = [],
+    yArraySide1Offset = [],
+    yArraySide2Offset = [],
+    windowWidth,
+    windowHeight,
+    center,
+    xStartPoint,
+    yStartPoint,
+    // Will be array of point objects, with one point object per point
+    flowVectorHolder = [];
+
+  console.log({ hexHeight });
+  console.log({ hexWidth });
+
+  // Listen for changes to the glow checkbox and lineWidth slider and re-render the flow field
+  // with those changes.
+  document.querySelector("#glow").addEventListener("change", (event) => {
+    console.log(event.currentTarget.checked);
+    glow = event.currentTarget.checked;
+    console.log({ glow });
+    render(lineWidth, glow);
+  });
+
+  document
+    .querySelector("#width-select")
+    .addEventListener("change", (event) => {
+      console.log(event.currentTarget.value);
+      // The value (the selected width) from the range slider is a string so convert to an int
+      lineWidth = Number.parseInt(event.currentTarget.value);
+      render(lineWidth, glow);
+    });
+  lineWidth = 6;
 
   windowWidth = canvas.width = window.innerWidth;
   windowHeight = canvas.height = window.innerHeight;
@@ -222,6 +276,14 @@ window.onload = function () {
     yCursorLoc = 0,
     rescaleRotateX = 0,
     rescaleRotateY = 0;
+
+  document.body.addEventListener("mouseenter", function () {
+    // Clear out the holder start text if needed.
+    if (document.querySelector(".start-text")) {
+      document.querySelector(".start-text").remove();
+    }
+  });
+
   document.body.addEventListener("mousemove", function (event) {
     xCursorLoc = event.clientX;
     yCursorLoc = event.clientY;
@@ -334,7 +396,7 @@ window.onload = function () {
     // console.log(angle);
   });
 
-  function render() {
+  function render(lineWidth, glow) {
     // comment out to have past vectors persist
     context.clearRect(0, 0, windowWidth, windowHeight);
     let currXvalue,
@@ -364,7 +426,7 @@ window.onload = function () {
       // console.log(currColorArray[1]);
       // console.log(currColorArray[2]);
       //context.strokeStyle = "rgb(255,0,0)";
-      context.lineWidth = 6;
+      context.lineWidth = lineWidth;
       context.strokeStyle = `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`;
       //console.log(
       //  `rgb(${currColorArray[0]},${currColorArray[1]},${currColorArray[2]})`
@@ -387,29 +449,29 @@ window.onload = function () {
       context.fill();
 
       if (glow) {
-        context.lineWidth = 3;
-        context.strokeStyle = `rgb(255,255,255,0.8)`;
+        // context.lineWidth = 3;
+        // context.strokeStyle = `rgb(255,255,255,0.8)`;
 
-        // Can't figure out how to have the glow not extend the whole length of each flow vector.
-        // All trials have created dual glow vector areas (change to rgb(0,0,0) to see/debug.)
-        // Have the glow cover 80% of the line length (so 90% of each side)
-        // side 1 is left, side 2 is right.
-        // let glowSide1 = new FlowVector(currXvalue_side1, currYvalue_side1);
-        // let glowSide2 = new FlowVector(currXvalue_side2, currYvalue_side2);
-        // glowSide1.setLength(0.5 * glowSide1.getLength());
-        // glowSide2.setLength(0.5 * glowSide2.getLength());
+        // // Can't figure out how to have the glow not extend the whole length of each flow vector.
+        // // All trials have created dual glow vector areas (change to rgb(0,0,0) to see/debug.)
+        // // Have the glow cover 80% of the line length (so 90% of each side)
+        // // side 1 is left, side 2 is right.
+        // // let glowSide1 = new FlowVector(currXvalue_side1, currYvalue_side1);
+        // // let glowSide2 = new FlowVector(currXvalue_side2, currYvalue_side2);
+        // // glowSide1.setLength(0.5 * glowSide1.getLength());
+        // // glowSide2.setLength(0.5 * glowSide2.getLength());
 
-        currXvalue_side1_glow1 = xArraySide1Offset[index];
-        currXvalue_side2_glow1 = xArraySide2Offset[index];
-        currYvalue_side1_glow1 = yArraySide1Offset[index];
-        currYvalue_side2_glow1 = yArraySide2Offset[index];
+        // currXvalue_side1_glow1 = xArraySide1Offset[index];
+        // currXvalue_side2_glow1 = xArraySide2Offset[index];
+        // currYvalue_side1_glow1 = yArraySide1Offset[index];
+        // currYvalue_side2_glow1 = yArraySide2Offset[index];
 
-        context.moveTo(currXvalue_side1_glow1, currYvalue_side1_glow1);
-        context.lineTo(currXvalue_side2_glow1, currYvalue_side2_glow1);
-        //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
-        //console.log(xArraySide1Offset[index]);
-        context.stroke();
-        context.fill();
+        // context.moveTo(currXvalue_side1_glow1, currYvalue_side1_glow1);
+        // context.lineTo(currXvalue_side2_glow1, currYvalue_side2_glow1);
+        // //context.arc(currXvalue, currYvalue, 1, 0, Math.PI * 2, false);
+        // //console.log(xArraySide1Offset[index]);
+        // context.stroke();
+        // context.fill();
 
         context.lineWidth = 1.5;
         context.strokeStyle = `rgb(255,255,255,1)`;
@@ -443,9 +505,15 @@ window.onload = function () {
     //animateAngle += speed;
     //console.log(animateAngle - prevHolder);
     //context.restore();
-    requestAnimationFrame(render);
+
+    // Because requestAnimationFrame requires a callback function with no input arguments, but the glow and lineWidth arguments are
+    // needed for the render() function in order to dynamically change them, need to wrap render(<arguments>) in an anonymous function
+    // that doesn't have any arguments.
+    requestAnimationFrame(() => {
+      render(lineWidth, glow);
+    });
   }
-  render();
+  render(lineWidth, glow);
 };
 
 // document.body.addEventListener("mousemove", function (event) {
